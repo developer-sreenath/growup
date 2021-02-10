@@ -1,29 +1,23 @@
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.base_user import BaseUserManager
 
 
-def UserAccountManager():
-    def create_user(self, email, username, password):
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_superuser', False)
         if not email:
-            raise ValueError('Users must have an email address')
-        if not username:
-            raise ValueError('Users must have an username')
-        user = self.model(
-            email=self.normailize_email(email),
-            username=username,
-        )
+            raise ValueError('Please enter an email address')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, password):
-        user = self.create_user(
-            email=email,
-            username=username,
-            password=password,
-        )
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_superuser', True)
 
-    def get_by_natural_key(self, username):
-        return self.get(username=username)
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)

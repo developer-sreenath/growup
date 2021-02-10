@@ -1,36 +1,24 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
-from .managers import UserAccountManager
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
+from django.utils.translation import ugettext_lazy as _
+from .managers import UserManager
 # Create your models here.
 
 
-class Account(AbstractBaseUser):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    username = models.CharField(max_length=20, unique=True)
-    email = models.EmailField(max_length=254, unique=True)
-    date_joined = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(auto_now=True)
-    is_superuser = models.BooleanField(default=False)
-    hide_email = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(_('email address'), unique=True)
+    first_name = models.CharField(_('first name'), max_length=30, blank=True)
+    last_name = models.CharField(_('last name'), max_length=30, blank=True)
+    date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
+    is_active = models.BooleanField(_('active'), default=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    objects = UserManager()
 
-    objects = UserAccountManager()
-
-    def Meta(self):
-        db_table = f'account'
-
-    def __str__(self):
-        return self.username
-
-    def has_perm(self, perm, obj=None):
-        return self.is_superuser
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def get_full_name(self):
-        return f'{self.first_name}/{" "}/{self.last_name}'
-
-    def is_active(self):
-        return self.is_active
+        full_name = '%s %s' % (self.first_name, self.last_name)
+        return full_name.strip()

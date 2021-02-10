@@ -75,12 +75,17 @@ WSGI_APPLICATION = 'growup.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'USER': 'sreenath',
+        'PASSWORD': '',
+        'NAME': 'growup',
+        'PORT': '5432',
     }
 }
 
-AUTH_USER_MODEL = 'accounts.Account'
+
+AUTH_USER_MODEL = 'accounts.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
